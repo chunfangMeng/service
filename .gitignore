@@ -1,0 +1,5 @@
+.DS_Store
+service/.idea
+service/venv
+webapp/.next
+webapp/node_module

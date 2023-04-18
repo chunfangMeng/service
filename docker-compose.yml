@@ -1,0 +1,92 @@
+version: "3"
+volumes:
+  redis_vol:
+  db_vol:
+  static_vol:
+  media_vol:
+networks:
+  redis_network:
+    driver: bridge
+  db_network:
+    driver: bridge
+  nginx_network:
+    driver: bridge
+services:
+  redis:
+    restart: always
+    image: redis:latest
+    command: redis-server /etc/redis/redis.conf
+    networks:
+      - redis_network
+    volumes:
+      - redis_vol:/data
+      - ./compose/redis/redis.conf:/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
+  db:
+    restart: always
+    image: mysql
+    env_file:
+      - ./service/.env.prod
+    networks:
+      - db_network
+    volumes:
+      - db_vol:/var/lib/mysql:rw  # 挂载数据，可读可写
+      - ./compose/mysql/conf/my.conf:/etc/mysql/my.cnf  # 挂载配置文件
+      - ./compose/mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+  app:
+    restart: always
+    build: ./service
+    env_file: ./service/.env.prod
+    networks:
+      - nginx_network
+      - redis_network
+      - db_network
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - .:/service
+      - static_vol:/var/www/html/service/static
+      - media_vol:/var/www/html/service/media
+      - ./compose/uwsgi:/tmp
+    expose:
+      - "8000"
+    tty: true
+    stdin_open: true
+
+  nginx:
+    build: ./compose/nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    expose:
+      - "80"
+    volumes:
+      - ./compose/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - ./compose/nginx/log:/var/log/nginx
+      - static_vol:/usr/share/nginx/html/static
+      - media_vol:/usr/share/nginx/html/media
+    networks:
+      - nginx_network
+    depends_on:
+      - app
+    restart: always
+  
+  celery_worker:
+    build:
+      context: ./service
+      dockerfile: ./Dockerfile
+    entrypoint: /var/www/html/service/start_celery.sh
+    volumes:
+      - .:/service
+    env_file:
+      - ./service/.env.prod
+    networks:
+      - redis_network
+    depends_on:
+      - app
+      - redis
+    restart: unless-stopped
