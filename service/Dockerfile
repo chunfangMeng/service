@@ -26,5 +26,9 @@ RUN sed -i 's/\r//' ./start_flower.sh
 
 RUN chmod +x ./start_flower.sh
 
+RUN sed -i 's/\r//' ./start_celery_beat.sh
+
+RUN chmod +x ./start_celery_beat.sh
+
 ENTRYPOINT /bin/bash ./start.sh
 

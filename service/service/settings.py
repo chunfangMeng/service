@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'captcha',
     'corsheaders',
     'django_filters',
+    'django_celery_beat',
     'apps.webapp',
     'apps.member',
     'apps.manager'

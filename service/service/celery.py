@@ -1,5 +1,8 @@
 # coding:utf-8
 from __future__ import absolute_import
+
+from datetime import timedelta
+
 from celery import Celery, platforms
 from dotenv import load_dotenv
 import os
@@ -28,8 +31,8 @@ app.conf.update(
     timezone='Europe/London',
     CELERYBEAT_SCHEDULE={
         # 'sum_task': {
-        #     'task': 'apps.webapp.celery_default_tasks.test',
-        #     'schedule': timedelta(seconds=2),
+        #     'task': 'apps.webapp.celery_tasks.test',
+        #     'schedule': timedelta(seconds=10),
         #     'args': ()
         # },
     }

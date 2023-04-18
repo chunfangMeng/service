@@ -91,11 +91,31 @@ services:
       - redis
     restart: unless-stopped
 
+  celery_beat:
+    build:
+      context: ./service
+      dockerfile: ./Dockerfile
+    entrypoint: /var/www/html/service/start_celery_beat.sh
+    volumes:
+      - .:/service
+    env_file:
+      - ./service/.env.prod
+    networks:
+      - redis_network
+      - db_network
+    depends_on:
+      - app
+      - redis
+      - db
+    restart: unless-stopped
+
   celery_flower:
     build:
       context: ./service
       dockerfile: ./Dockerfile
     entrypoint: /var/www/html/service/start_flower.sh
+    ports:
+      - "5555:5555"
     volumes:
       - .:/service
     env_file:
