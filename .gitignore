@@ -2,4 +2,4 @@
 service/.idea
 service/venv
 webapp/.next
-webapp/node_module
+webapp/node_modules
