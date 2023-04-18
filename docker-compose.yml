@@ -90,3 +90,19 @@ services:
       - app
       - redis
     restart: unless-stopped
+
+  celery_flower:
+    build:
+      context: ./service
+      dockerfile: ./Dockerfile
+    entrypoint: /var/www/html/service/start_flower.sh
+    volumes:
+      - .:/service
+    env_file:
+      - ./service/.env.prod
+    networks:
+      - redis_network
+    depends_on:
+      - app
+      - redis
+    restart: unless-stopped

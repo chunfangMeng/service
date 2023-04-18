@@ -1,4 +1,6 @@
 .DS_Store
+compose/nginx/log/*
+compose/uwsgi/*
 service/.idea
 service/venv
 webapp/.next
