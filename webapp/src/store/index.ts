@@ -1,3 +1,7 @@
+import { enableStaticRendering } from "mobx-react-lite";
+
+enableStaticRendering(typeof window === "undefined")
+
 export const createStore = () => {
   const memberStore = {
     tokenKey: '',

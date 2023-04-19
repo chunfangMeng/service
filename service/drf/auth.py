@@ -22,9 +22,6 @@ class UserBaseAuthenticate(authentication.SessionAuthentication):
             raise exceptions.AuthenticationFailed('请重新登陆')
 
     def authenticate(self, request):
-        print(dir(request))
-        print(request.META)
-        print(request._request.user)
         user = getattr(request._request, 'user', None)
         if user and user.is_active:
             if not hasattr(user, 'auth_token') or user.auth_token is None:
@@ -33,7 +30,6 @@ class UserBaseAuthenticate(authentication.SessionAuthentication):
             self.enforce_csrf(request)
             return user, None
         token_key = request.META.get('HTTP_AUTHORIZATION')
-        print('token>>>', token_key, request.META.get('HTTP_COOKIE'))
         if not token_key:
             raise exceptions.AuthenticationFailed('token不能为空')
         try:

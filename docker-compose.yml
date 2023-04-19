@@ -36,6 +36,8 @@ services:
       - ./compose/mysql/init:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
+    expose:
+      - "3306"
   app:
     restart: always
     build: ./service
@@ -62,8 +64,10 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "3001:3001"
     expose:
       - "80"
+      - "3001"
     volumes:
       - ./compose/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
       - ./compose/nginx/log:/var/log/nginx
@@ -126,3 +130,14 @@ services:
       - app
       - redis
     restart: unless-stopped
+
+  web_app:
+    build:
+      context: ./webapp
+      dockerfile: ./Dockerfile
+    networks:
+      - nginx_network
+    expose:
+      - "3000"
+    ports:
+      - "3000:3000"

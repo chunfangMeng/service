@@ -9,7 +9,7 @@ import { ReactElement, ReactNode, createContext } from 'react';
 import { Response } from '@/http'
 import router from "next/router";
 import { authMember } from "@/api/auth";
-import { useLocalStore } from "mobx-react-lite";
+import { useLocalObservable, useLocalStore } from "mobx-react-lite";
 import createStore, { TStore } from "@/store";
 
 type NextPageWithLayout = NextPage & {
@@ -31,7 +31,7 @@ const notAuthRoutes = ['/', '/login']
 export const StoreContext = createContext<TStore | null>(null);
 
 const StoreProvider = ({children}: any) => {
-  const store = useLocalStore(createStore);
+  const store = useLocalObservable(createStore);
   return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 }
 
@@ -57,6 +57,7 @@ function App({ Component, router, pageProps, props }: AppPropsWithLayout) {
 App.getInitialProps = async (context: AppContext) => {
   let isAuth = true;
   const { req, res } = context.ctx;
+  // console.log(req?.headers.cookie)
   const memberInfo = await authMember.getMemberInfo()
   if (memberInfo && [401, 403].includes(memberInfo.code)) {
     isAuth = notAuthRoutes.includes(context.router.pathname)

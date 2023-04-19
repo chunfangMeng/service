@@ -7,12 +7,14 @@ from apps.member.views.serializers import MemberSerializer
 from drf.auth import UserBaseAuthenticate
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin
 from drf.response import JsonResponse
+from drf.throttle import RedisTokenBucketThrottle
 
 
 class MemberView(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin):
     queryset = UserMember.objects.all().order_by('-id')
     serializer_class = MemberSerializer
     authentication_classes = [UserBaseAuthenticate]
+    throttle_classes = [RedisTokenBucketThrottle, ]
     auth_context = AuthContext()
 
     @action(methods=['get'], detail=False)

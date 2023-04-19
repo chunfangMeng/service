@@ -14,7 +14,8 @@ class ApiHttp {
   instance: AxiosInstance
   constructor() {
     this.instance = axios.create({
-      baseURL: process.env.SHOP_HOST
+      baseURL: 'http://localhost:8000',
+      withCredentials: true
     })
     this.instance.interceptors.request.use(
       (values) => {
@@ -33,6 +34,11 @@ class ApiHttp {
     )
     this.instance.interceptors.response.use(
       (response) => {
+        if (typeof window === 'undefined') {
+          console.log('>>>', response.headers)
+        } else {
+          console.log('<<<', response.headers)
+        }
         if (Object.keys(response.data).includes('code')) {
           return response.data
         }

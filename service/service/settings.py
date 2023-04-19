@@ -45,14 +45,29 @@ MIDDLEWARE = [
     'libs.runtime_logging.RunTimeMiddleware'
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:3001',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:3001',
+    'http://127.0.0.1:8000'
 ]
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost']
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1']
 
 ROOT_URLCONF = 'service.urls'
 
@@ -129,6 +144,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
+# Redis
+REDIS_HOST = os.environ.get('REDIS_HOST')
+REDIS_PORT = int(os.environ.get('REDIS_PORT'))
+REDIS_DB = int(os.environ.get('REDIS_DB'))
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -141,6 +161,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication'
     ],
     'EXCEPTION_HANDLER': 'drf.exception_handler.custom_exception_handler',
+    'DEFAULT_THROTTLE_CLASSES': (
+        'drf.throttle.RedisTokenBucketThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'redis_token_bucket': '100/hour',
+    },
 }
 
 REST_TOKEN_VALID_DAY = os.environ.get('REST_TOKEN_VALID_DAY')
