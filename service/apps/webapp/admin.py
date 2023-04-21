@@ -1,3 +1,6 @@
 from django.contrib import admin
 
-# Register your models here.
+from apps.webapp.models import ManagerDownload, Banner
+
+admin.site.register(ManagerDownload)
+admin.site.register(Banner)
