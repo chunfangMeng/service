@@ -2,7 +2,7 @@ from enum import Enum
 from django.contrib.auth.models import User
 from django.db import models
 
-from apps.webapp.models import TimeStampAbstract
+from apps.webapp.models.abstract_models import TimeStampAbstract
 
 
 class GenderEnum(Enum):

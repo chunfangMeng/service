@@ -1,5 +1,8 @@
+import traceback
+
 from rest_framework.exceptions import Throttled
 
+from django.conf import settings
 from drf.response import JsonResponse
 
 
@@ -8,10 +11,9 @@ def custom_exception_handler(exc, context):
     # to get the standard error response.
     # response = exception_handler(exc, context)
     # Now add the HTTP status code to the response.
-    exception_class = exc.__class__.__name__
-    filename = exc.__traceback__.tb_frame.f_code.co_filename
-    lineno = exc.__traceback__.tb_lineno
-    print(f'{exception_class} at {filename}:{lineno}')
+    if settings.DEBUG:
+        traceback_info = traceback.format_exc()
+        print(traceback_info)
     if isinstance(exc, Throttled):
         exc.detail = '请求次数太过频繁，请稍后再试'
     return JsonResponse(

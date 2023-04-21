@@ -3,7 +3,7 @@ import pytz
 from datetime import datetime, timedelta
 from django.conf import settings
 
-from apps.manager.models import ManagerUser
+from apps.manager.models.user_models import ManagerUser
 from drf.exceptions import TokenDoesNotExist
 from rest_framework import authentication
 from rest_framework.authtoken.models import Token

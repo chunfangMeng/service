@@ -2,9 +2,10 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 
 from apps.member.auth_user import AuthContext
-from apps.member.models import UserMember
+from apps.member.models.user_models import UserMember
 from apps.member.views.serializers import MemberSerializer
 from drf.auth import UserBaseAuthenticate
+from drf.exceptions import RequestParamsError
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin
 from drf.response import JsonResponse
 from drf.throttle import RedisTokenBucketThrottle
@@ -21,7 +22,7 @@ class MemberView(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModel
     def info(self, request):
         instance = self.queryset.filter(user=request.user).first()
         if not instance:
-            return JsonResponse(code=401, status=401, message="请先进行登录")
+            raise RequestParamsError('请先进行登录')
         serializer = self.get_serializer(instance)
         return JsonResponse(data=serializer.data)
 

@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from apps.manager.models import ManagerUser
+from apps.manager.models.user_models import ManagerUser
 from drf.exceptions import RequestParamsError
 
 

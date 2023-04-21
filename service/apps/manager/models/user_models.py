@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from apps.member.models import GENDER_CLASSIFY
-from apps.webapp.models import TimeStampAbstract
+from apps.member.models.user_models import GENDER_CLASSIFY
+from apps.webapp.models.abstract_models import TimeStampAbstract
 
 
 class ManagerUser(TimeStampAbstract):

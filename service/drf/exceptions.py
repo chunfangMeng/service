@@ -11,3 +11,6 @@ class RequestParamsError(APIException):
     status_code = 421
     default_detail = '参数错误'
     default_code = 'params error'
+
+    def __init__(self, message: str):
+        self.default_detail = message

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.member.models import UserMember
+from apps.member.models.user_models import UserMember
 
 
 class MemberSerializer(serializers.ModelSerializer):

@@ -183,7 +183,7 @@ LOGGING = {
             'style': '{',
         },
         'simple': {
-            'format': '{levelname} {message}',
+            'format': '{levelname} {asctime} [{message}] {process:d} {thread:d}',
             'style': '{',
         },
     },
