@@ -1,3 +1,4 @@
+import django_filters
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.decorators import action
 
@@ -6,17 +7,18 @@ from apps.member.models.user_models import UserMember
 from apps.member.views.serializers import MemberSerializer
 from drf.auth import UserBaseAuthenticate
 from drf.exceptions import RequestParamsError
-from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin
+from drf.mixins import CreateModelMixin, RetrieveModelMixin
 from drf.response import JsonResponse
 from drf.throttle import RedisTokenBucketThrottle
 
 
-class MemberView(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin):
+class MemberView(GenericViewSet, CreateModelMixin, RetrieveModelMixin):
     queryset = UserMember.objects.all().order_by('-id')
     serializer_class = MemberSerializer
     authentication_classes = [UserBaseAuthenticate]
     throttle_classes = [RedisTokenBucketThrottle, ]
     auth_context = AuthContext()
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
 
     @action(methods=['get'], detail=False)
     def info(self, request):

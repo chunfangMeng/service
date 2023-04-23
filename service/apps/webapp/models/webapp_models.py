@@ -24,3 +24,30 @@ class ManagerDownload(TimeStampAbstract):
 
     class Meta:
         db_table = 'manager_download'
+
+
+class Country(TimeStampAbstract):
+    # 国家
+    gec_code = models.CharField(max_length=4, unique=True, help_text="GEC代码")
+    name = models.CharField(max_length=48, help_text="名称")
+
+    class Meta:
+        db_table = 'country'
+
+    def __str__(self):
+        return f'{self.gec_code} - {self.name}'
+
+
+class ChinaProvinceArea(models.Model):
+    # 中国行政区域信息，包含省市区信息
+    area_code = models.CharField(max_length=12, help_text="行政区域代码")
+    name = models.CharField(max_length=48, help_text="名称")
+    parent_code = models.CharField(max_length=12, null=True, blank=True, help_text="父级行政区域代码")
+
+    class Meta:
+        db_table = 'china_province_area'
+        unique_together = ('area_code', 'name')
+
+    def __str__(self):
+        return f'{self.area_code} / {self.name}'
+

@@ -1,5 +1,5 @@
 import { message } from "antd";
-import axios, { AxiosError, AxiosInstance } from "axios";
+import axios, { AxiosError, AxiosInstance, CreateAxiosDefaults } from "axios";
 
 
 type RequestData = {}
@@ -12,22 +12,13 @@ export type Response<T> = {
 
 class ApiHttp {
   instance: AxiosInstance
-  constructor() {
-    this.instance = axios.create({
+  constructor(config?: CreateAxiosDefaults) {
+    this.instance = axios.create(config ?? {
       baseURL: 'http://localhost:8000',
       withCredentials: true
     })
     this.instance.interceptors.request.use(
       (values) => {
-        // let token = ''
-        // try {
-        //    token = localStorage.getItem('http_token') ?? ''
-        // } catch {
-        //   token = ''
-        // }
-        // if (token !== null && typeof values.headers !== "undefined") {
-        //   values['headers'].setAuthorization(`token ${token}`)
-        // }
         return values
       },
       error => {}

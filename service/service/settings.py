@@ -167,6 +167,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'redis_token_bucket': '100/hour',
     },
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 REST_TOKEN_VALID_DAY = os.environ.get('REST_TOKEN_VALID_DAY')

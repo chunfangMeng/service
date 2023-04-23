@@ -44,7 +44,10 @@ class ExcelHandler(object):
         for row in sheet.iter_rows(min_row=min_row):
             row_data = list()
             for cell in row:
-                row_data.append(cell.value)
+                if cell.value is not None:
+                    row_data.append(cell.value)
+            if len(row_data) == 0:
+                continue
             rows.append(row_data)
         return rows, None
 

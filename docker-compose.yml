@@ -131,13 +131,13 @@ services:
       - redis
     restart: unless-stopped
 
-  web_app:
-    build:
-      context: ./webapp
-      dockerfile: ./Dockerfile
-    networks:
-      - nginx_network
-    expose:
-      - "3000"
-    ports:
-      - "3000:3000"
+  # web_app:
+  #   build:
+  #     context: ./webapp
+  #     dockerfile: ./Dockerfile
+  #   networks:
+  #     - nginx_network
+  #   expose:
+  #     - "3000"
+  #   ports:
+  #     - "3000:3000"
