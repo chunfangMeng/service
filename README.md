@@ -1,1 +1,5 @@
-个人demo
+## Practise
+
+### Run
+
+> bash build_and_up_prod.sh

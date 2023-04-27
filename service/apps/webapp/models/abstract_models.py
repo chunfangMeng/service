@@ -10,3 +10,16 @@ class TimeStampAbstract(models.Model):
 
     class Meta:
         abstract = True
+
+
+class OperatorAbstract(models.Model):
+    """
+    操作人
+    """
+    founder = models.CharField(max_length=150, null=True, blank=True,
+                               help_text="创建者[username in the User table]")
+    last_editor = models.CharField(max_length=150, null=True, blank=True,
+                                   help_text="最后修改人[username in the User table]")
+
+    class Meta:
+        abstract = True

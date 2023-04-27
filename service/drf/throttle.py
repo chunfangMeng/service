@@ -9,8 +9,8 @@ from libs.redis import RedisClient
 class RedisTokenBucketThrottle(SimpleRateThrottle):
     def __init__(self):
         self.redis_client = RedisClient().redis_cli
-        self.capacity = 10  # 每分钟最多请求次数
-        self.fill_rate = 1 / 60  # 每秒填充 token 数量
+        self.capacity = 30  # 每分钟最多请求次数
+        self.fill_rate = 1 / 20  # 每秒填充 token 数量
 
     def get_cache_key(self, request, view):
         return self.get_ident(request)

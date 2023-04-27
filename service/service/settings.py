@@ -30,7 +30,8 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'apps.webapp',
     'apps.member',
-    'apps.manager'
+    'apps.manager',
+    'apps.product'
 ]
 
 MIDDLEWARE = [
@@ -161,12 +162,12 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication'
     ],
     'EXCEPTION_HANDLER': 'drf.exception_handler.custom_exception_handler',
-    'DEFAULT_THROTTLE_CLASSES': (
-        'drf.throttle.RedisTokenBucketThrottle',
-    ),
-    'DEFAULT_THROTTLE_RATES': {
-        'redis_token_bucket': '100/hour',
-    },
+    # 'DEFAULT_THROTTLE_CLASSES': (
+    #     'drf.throttle.RedisTokenBucketThrottle',
+    # ),
+    # 'DEFAULT_THROTTLE_RATES': {
+    #     'redis_token_bucket': '100/hour',
+    # },
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }
 

@@ -13,4 +13,5 @@ class RequestParamsError(APIException):
     default_code = 'params error'
 
     def __init__(self, message: str):
-        self.default_detail = message
+        self.detail = message
+        super().__init__(message)

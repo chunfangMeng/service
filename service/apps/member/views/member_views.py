@@ -16,7 +16,7 @@ class MemberView(GenericViewSet, CreateModelMixin, RetrieveModelMixin):
     queryset = UserMember.objects.all().order_by('-id')
     serializer_class = MemberSerializer
     authentication_classes = [UserBaseAuthenticate]
-    throttle_classes = [RedisTokenBucketThrottle, ]
+    # throttle_classes = [RedisTokenBucketThrottle, ]
     auth_context = AuthContext()
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
 

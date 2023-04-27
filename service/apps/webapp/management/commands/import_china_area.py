@@ -37,6 +37,5 @@ class Command(BaseCommand):
                                     'parent_code': city_item.get('code')
                                 }
                             )
-            print(province_item)
         print('success')
 
