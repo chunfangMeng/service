@@ -37,7 +37,7 @@ class UserBaseAuthenticate(authentication.SessionAuthentication):
             if token_obj is None:
                 raise exceptions.AuthenticationFailed('请重新登陆')
             self.verify_token(token_obj)
-            self.verify_manager(token_obj.user)
+            # self.verify_manager(token_obj.user)
             request.user = token_obj.user
         except Token.DoesNotExist:
             raise TokenDoesNotExist('token无效')
@@ -53,49 +53,12 @@ class ManageAuthenticate(UserBaseAuthenticate):
             raise exceptions.AuthenticationFailed('账号异常')
 
     def authenticate(self, request):
-        user = getattr(request._request, 'user', None)
-        if user and user.is_active:
-            if not hasattr(user, 'auth_token') or user.auth_token is None:
-                raise exceptions.AuthenticationFailed('请重新登陆')
-            self.verify_token(user.auth_token)
-            self.verify_manager(user)
-            self.enforce_csrf(request)
-            return user, None
-        token_key = request.META.get('HTTP_AUTHORIZATION')
-        if not token_key:
-            raise exceptions.AuthenticationFailed('token不能为空')
-        try:
-            token_obj = Token.objects.get(key=token_key.split(' ')[1])
-            if token_obj is None:
-                raise exceptions.AuthenticationFailed('请重新登陆')
-            self.verify_token(token_obj)
-            self.verify_manager(token_obj.user)
-            request.user = token_obj.user
-        except Token.DoesNotExist:
-            raise TokenDoesNotExist('token无效')
-        return token_obj.user, None
+        user, _ = super().authenticate(request)
+        self.verify_manager(user)
+        return user, _
 
 
 class MemberUserAuthenticate(UserBaseAuthenticate):
     def authenticate(self, request):
-        user = getattr(request._request, 'user', None)
-        if user and user.is_active:
-            if not hasattr(user, 'auth_token') or user.auth_token is None:
-                raise exceptions.AuthenticationFailed('请重新登陆')
-            self.verify_token(user.auth_token)
-            self.verify_manager(user)
-            self.enforce_csrf(request)
-            return user, None
-        token_key = request.META.get('HTTP_AUTHORIZATION')
-        if not token_key:
-            raise exceptions.AuthenticationFailed('token不能为空')
-        try:
-            token_obj = Token.objects.get(key=token_key.split(' ')[1])
-            if token_obj is None:
-                raise exceptions.AuthenticationFailed('请重新登陆')
-            self.verify_token(token_obj)
-            self.verify_manager(token_obj.user)
-            request.user = token_obj.user
-        except Token.DoesNotExist:
-            raise TokenDoesNotExist('token无效')
-        return token_obj.user, None
+        user, _ = super().authenticate(request)
+        return user, _
