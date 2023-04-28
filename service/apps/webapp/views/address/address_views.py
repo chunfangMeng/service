@@ -15,7 +15,7 @@ class ProvincesAreaView(GenericViewSet):
     serializer_class = ChinaAddressAreaSerializer
     all_address_cache_key = 'ALL_CHINA_ADDRESS'
 
-    def list(self, request):
+    def list(self):
         try:
             all_china_address = json.loads(cache.get(self.all_address_cache_key, '{}'))
             if all_china_address:

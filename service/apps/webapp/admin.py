@@ -1,8 +1,9 @@
 from django.contrib import admin
 
-from apps.webapp.models import ManagerDownload, Banner, Country, ChinaProvinceArea
+from django.apps import apps
 
-admin.site.register(ManagerDownload)
-admin.site.register(Banner)
-admin.site.register(Country)
-admin.site.register(ChinaProvinceArea)
+for model in apps.get_models():
+    try:
+        admin.site.register(model)
+    except admin.sites.AlreadyRegistered:
+        pass
