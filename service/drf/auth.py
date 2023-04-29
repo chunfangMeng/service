@@ -37,7 +37,6 @@ class UserBaseAuthenticate(authentication.SessionAuthentication):
             if token_obj is None:
                 raise exceptions.AuthenticationFailed('请重新登陆')
             self.verify_token(token_obj)
-            # self.verify_manager(token_obj.user)
             request.user = token_obj.user
         except Token.DoesNotExist:
             raise TokenDoesNotExist('token无效')
