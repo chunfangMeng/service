@@ -1,8 +1,16 @@
+import json
+
+from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
+from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import GenericViewSet
 
 from apps.product.models.product_models import ProductCategory, ProductBrand
+from apps.product.views.management.filters import BrandFilter
 from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer
 from drf.auth import ManageAuthenticate
+from drf.exceptions import ApiNotFoundError
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
 from drf.response import JsonResponse
 
@@ -33,12 +41,62 @@ class ProductCategoryView(GenericViewSet, ListModelMixin, CreateModelMixin, Retr
         return JsonResponse(serializer.data)
 
 
-class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin):
+class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateModelMixin):
     """
     商品品牌管理
     """
     authentication_classes = [ManageAuthenticate, ]
     permission_classes = []
-    queryset = ProductBrand.objects.all()
+    queryset = ProductBrand.objects.filter(~Q(status=ProductBrand.BrandStatus.DELETED))
     serializer_class = ProductBrandSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_class = BrandFilter
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_queryset().filter(
+            Q(brand_code=kwargs.get('pk')) | Q(id=kwargs.get('pk'))
+        ).first()
+        if instance is None:
+            raise ApiNotFoundError('品牌不存在或已被删除')
+        if instance.status == ProductBrand.BrandStatus.DRAFT:
+            return JsonResponse(instance.json_object)
+        serializer = self.get_serializer(instance)
+        return JsonResponse(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_queryset().filter(
+            Q(brand_code=kwargs.get('pk')) | Q(id=kwargs.get('pk'))
+        ).first()
+        if instance is None:
+            raise ApiNotFoundError('品牌不存在或已被删除')
+        instance.status = ProductBrand.BrandStatus.DELETED
+        instance.save(update_fields=['status'])
+        return JsonResponse(status=status.HTTP_204_NO_CONTENT)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        update_data = request.data
+        if str(update_data.get('status')) != str(ProductBrand.BrandStatus.DRAFT):
+            update_data['version'] = update_data.get('version') + 1
+            update_data['json_object'] = self.get_serializer(instance).data
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            # If 'prefetch_related' has been applied to a queryset, we need to
+            # forcibly invalidate the prefetch cache on the instance.
+            instance._prefetched_objects_cache = {}
+
+        return JsonResponse(serializer.data)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
+
 
