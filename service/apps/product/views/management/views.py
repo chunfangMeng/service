@@ -7,7 +7,7 @@ from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, Upd
 from drf.response import JsonResponse
 
 
-class ProductCategoryView(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin):
+class ProductCategoryView(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin):
     """
     商品分类管理
     """
@@ -31,13 +31,6 @@ class ProductCategoryView(GenericViewSet, ListModelMixin, CreateModelMixin, Retr
             instance._prefetched_objects_cache = {}
 
         return JsonResponse(serializer.data)
-
-    def perform_update(self, serializer):
-        serializer.save()
-
-    def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return self.update(request, *args, **kwargs)
 
 
 class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin):
