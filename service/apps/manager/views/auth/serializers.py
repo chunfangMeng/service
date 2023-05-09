@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from apps.member.models import GenderEnum
 from apps.manager.models.user_models import ManagerUser, UserLoginLog
+from apps.member.models import UserGenderChoices
 
 
 class ManageUserSerializer(serializers.ModelSerializer):
@@ -9,7 +9,7 @@ class ManageUserSerializer(serializers.ModelSerializer):
     last_update = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
     gender = serializers.ChoiceField(
         source='get_gender_display',
-        choices=tuple([gender_item.value, gender_item.name] for gender_item in GenderEnum)
+        choices=UserGenderChoices.choices
     )
 
     class Meta:

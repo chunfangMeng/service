@@ -1,4 +1,3 @@
-from enum import Enum
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -6,7 +5,7 @@ from apps.webapp.models.abstract_models import TimeStampAbstract
 from apps.webapp.models.webapp_models import Country
 
 
-class GenderEnum(Enum):
+class UserGenderChoices(models.IntegerChoices):
     UNKNOWN = 0
     MAN = 1
     WOMAN = 2
@@ -19,7 +18,7 @@ class UserMember(TimeStampAbstract):
     phone = models.CharField(max_length=24, null=True, blank=True, help_text="联系电话")
     gender = models.IntegerField(
         default=0,
-        choices=tuple([tag.value, tag.name] for tag in GenderEnum),
+        choices=UserGenderChoices.choices,
         help_text="性别"
     )
 

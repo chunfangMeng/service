@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 
-from apps.member.models import GenderEnum
+from apps.member.models import UserGenderChoices
 from apps.webapp.models.abstract_models import TimeStampAbstract
 
 
@@ -11,7 +11,7 @@ class ManagerUser(TimeStampAbstract):
     phone = models.CharField(max_length=24, null=True, blank=True, verbose_name="联系电话")
     gender = models.IntegerField(
         default=0,
-        choices=tuple([tag.value, tag.name] for tag in GenderEnum),
+        choices=UserGenderChoices.choices,
         help_text="性别"
     )
 
