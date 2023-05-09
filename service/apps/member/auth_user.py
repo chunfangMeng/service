@@ -1,5 +1,6 @@
 import inspect
 import sys
+
 from abc import abstractmethod
 from datetime import datetime, timedelta
 from enum import Enum
@@ -10,7 +11,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
-from apps.manager.models.user_models import ManagerUser
+from apps.manager.models.user_models import ManagerUser, UserLoginLog
+from apps.webapp.celery_tasks import user_bind_ip_area
 from drf.exceptions import RequestParamsError
 
 
@@ -87,15 +89,27 @@ class UserManagerAuth(UserAuthenticate):
 
 class AuthContext(object):
     CLIENT_SELECTOR = {}
+    ip_area_url = ''
 
     def __init__(self, client=UserMemberAuth.CLIENT_CODE):
         for name, _class in inspect.getmembers(sys.modules[__name__], inspect.isclass):
             if issubclass(_class, UserAuthenticate) and hasattr(_class, 'CLIENT_CODE'):
                 self.CLIENT_SELECTOR.update({_class.CLIENT_CODE: _class})
         self.auth_class = self.CLIENT_SELECTOR.get(client)
+        self.client = client
 
     def auth(self, request):
         token_key, user, message = self.auth_class().auth(request)
+        # 记录登录日志
+        ip_address = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        if not ip_address:
+            ip_address = request.META.get('REMOTE_ADDR', "")
+        login_log_object = UserLoginLog.objects.create(
+            user=user,
+            client=self.client.value,
+            ip_address=ip_address,
+        )
+        user_bind_ip_area.delay(ip_address, login_log_object.id)
         return token_key, user, message
 
     def user_logout(self, request):

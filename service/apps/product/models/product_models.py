@@ -39,7 +39,7 @@ class ProductBrand(TimeStampAbstract, OperatorAbstract):
         ONLINE = 2
         DELETED = 3
         OFFLINE = 4
-    name = models.CharField(max_length=32, db_index=True, verbose_name="商品品牌")
+    name = models.CharField(max_length=32, verbose_name="商品品牌")
     brand_code = models.CharField(max_length=32, unique=True, verbose_name='品牌代码')
     en_name = models.CharField(max_length=48, verbose_name="英文品牌")
     status = models.IntegerField(default=BrandStatus.INIT, choices=BrandStatus.choices, verbose_name="状态")
@@ -47,7 +47,7 @@ class ProductBrand(TimeStampAbstract, OperatorAbstract):
     info = models.CharField(max_length=256, null=True, blank=True, verbose_name="品牌信息")
     priority = models.IntegerField(default=0, verbose_name="优先权")
     version = models.IntegerField(default=0, verbose_name="版本号")
-    json_object = models.JSONField(null=True, verbose_name="旧版本数据")
+    json_object = models.JSONField(null=True, blank=True, verbose_name="旧版本数据")
 
     def __str__(self):
         return f'{self.name} - {self.en_name}'
@@ -122,7 +122,7 @@ class Product(TimeStampAbstract, OperatorAbstract):
                                       null=True, blank=True, verbose_name="商品品牌")
 
     class Meta:
-        db_table = 'Product'
+        db_table = 'product'
         unique_together = ('spu_number', 'name', 'sub_name')
         verbose_name = 'Product'
         ordering = ('-id', )

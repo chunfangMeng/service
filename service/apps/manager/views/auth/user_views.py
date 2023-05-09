@@ -3,8 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.authtoken.models import Token
 
-from apps.manager.models.user_models import ManagerUser
-from apps.manager.views.auth.serializers import ManageUserSerializer
+from apps.manager.models.user_models import ManagerUser, UserLoginLog
+from apps.manager.views.auth.serializers import ManageUserSerializer, UserLoginSerializer
 from apps.member.auth_user import AuthContext, AuthClientEnum
 from drf.auth import ManageAuthenticate
 from drf.response import JsonResponse
@@ -42,3 +42,23 @@ class ManageUserView(GenericViewSet):
         auth_logout(request)
         request.user.auth_token.delete()
         return JsonResponse()
+
+
+class UserLoginLogView(GenericViewSet):
+    authentication_classes = [ManageAuthenticate, ]
+    permission_classes = []
+    queryset = UserLoginLog.objects.all().order_by('-create_at')
+    serializer_class = UserLoginSerializer
+
+    @action(methods=['get'], detail=False)
+    def personal(self, request):
+        queryset = self.get_queryset().filter(user=request.user)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return JsonResponse(serializer.data)
+

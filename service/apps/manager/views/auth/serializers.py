@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.member.models import GenderEnum
-from apps.manager.models.user_models import ManagerUser
+from apps.manager.models.user_models import ManagerUser, UserLoginLog
 
 
 class ManageUserSerializer(serializers.ModelSerializer):
@@ -14,4 +14,12 @@ class ManageUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ManagerUser
+        fields = '__all__'
+
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    create_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S')
+
+    class Meta:
+        model = UserLoginLog
         fields = '__all__'

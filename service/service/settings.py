@@ -51,9 +51,10 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
     'http://localhost:3001',
-    'http://127.0.0.1:3000',
+    'http://localhost:3000',
     'http://127.0.0.1:3001',
     'http://127.0.0.1:8000',
+    'http://localhost:8000',
     'http://127.0.0.1:8001'
 ]
 
@@ -65,11 +66,11 @@ CORS_ALLOW_HEADERS = [
     "dnt",
     "origin",
     "user-agent",
-    "x-csrftoken",
+    "x-CSRFToken",
     "x-requested-with",
 ]
 
-CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['http://localhost/', 'http://127.0.0.1/', 'http://localhost:8000/']
 
 ROOT_URLCONF = 'service.urls'
 
@@ -173,6 +174,10 @@ REST_FRAMEWORK = {
 }
 
 REST_TOKEN_VALID_DAY = os.environ.get('REST_TOKEN_VALID_DAY')
+
+# Captcha
+CAPTCHA_IMAGE_SIZE = (80, 45)
+
 
 LOGGING = {
     'version': 1,

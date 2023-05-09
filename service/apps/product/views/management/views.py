@@ -1,8 +1,9 @@
-import json
-
 from django.db.models import Q
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import GenericViewSet
 
@@ -21,7 +22,7 @@ class ProductCategoryView(GenericViewSet, ListModelMixin, CreateModelMixin, Retr
     """
     authentication_classes = [ManageAuthenticate, ]
     permission_classes = []
-    queryset = ProductCategory.objects.all()
+    queryset = ProductCategory.objects.all().order_by('priority')
     serializer_class = CategorySerializer
 
     def update(self, request, *args, **kwargs):
@@ -63,10 +64,17 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
         serializer = self.get_serializer(instance)
         return JsonResponse(serializer.data)
 
+    def _get_brand_instance(self, code):
+        if isinstance(code, int):
+            instance = self.get_queryset().filter(
+                id=code
+            ).first()
+            return instance
+        return self.get_queryset().filter(brand_code=code).first()
+
+    @method_decorator(csrf_exempt, name='dispatch')
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_queryset().filter(
-            Q(brand_code=kwargs.get('pk')) | Q(id=kwargs.get('pk'))
-        ).first()
+        instance = self._get_brand_instance(kwargs.get('pk'))
         if instance is None:
             raise ApiNotFoundError('品牌不存在或已被删除')
         instance.status = ProductBrand.BrandStatus.DELETED
@@ -75,9 +83,14 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
-        instance = self.get_object()
         update_data = request.data
+        print(update_data)
+        instance = self._get_brand_instance(kwargs.get('pk'))
+        if instance is None:
+            raise ApiNotFoundError('品牌不存在')
+        update_data['id'] = instance.id
         if str(update_data.get('status')) != str(ProductBrand.BrandStatus.DRAFT):
+            update_data['status'] = ProductBrand.BrandStatus.DRAFT
             update_data['version'] = update_data.get('version') + 1
             update_data['json_object'] = self.get_serializer(instance).data
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -91,12 +104,16 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
 
         return JsonResponse(serializer.data)
 
-    def perform_update(self, serializer):
-        serializer.save()
-
-    def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        return self.update(request, *args, **kwargs)
+    @action(methods=['get'], detail=False)
+    def options(self, request):
+        return JsonResponse(
+            data={
+                'status_options': [{
+                    'label': item.name,
+                    'value': item.value
+                } for item in ProductBrand.BrandStatus]
+            }
+        )
 
 
 
