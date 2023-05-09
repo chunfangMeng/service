@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.product.models.product_models import ProductCategory, ProductBrand
+from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -41,3 +41,11 @@ class ProductBrandSerializer(serializers.ModelSerializer):
                 }
             }
         }
+
+
+class AttributeKeySerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
+
+    class Meta:
+        model = ProductAttributeKey
+        fields = '__all__'

@@ -7,9 +7,9 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import GenericViewSet
 
-from apps.product.models.product_models import ProductCategory, ProductBrand
+from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey
 from apps.product.views.management.filters import BrandFilter
-from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer
+from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer, AttributeKeySerializer
 from drf.auth import ManageAuthenticate
 from drf.exceptions import ApiNotFoundError
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
@@ -116,4 +116,11 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
         )
 
 
-
+class AttributeKeyView(GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
+    """
+    商品属性Key
+    """
+    authentication_classes = [ManageAuthenticate, ]
+    permission_classes = []
+    queryset = ProductAttributeKey.objects.all().order_by('priority')
+    serializer_class = AttributeKeySerializer

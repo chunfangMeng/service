@@ -11,6 +11,9 @@ from drf.response import JsonResponse
 
 
 class ManageUserView(GenericViewSet):
+    """
+    后台会员管理
+    """
     queryset = ManagerUser.objects.all()
     serializer_class = ManageUserSerializer
     authentication_classes = [ManageAuthenticate, ]
@@ -45,6 +48,9 @@ class ManageUserView(GenericViewSet):
 
 
 class UserLoginLogView(GenericViewSet):
+    """
+    用户登录日志
+    """
     authentication_classes = [ManageAuthenticate, ]
     permission_classes = []
     queryset = UserLoginLog.objects.all().order_by('-create_at')
