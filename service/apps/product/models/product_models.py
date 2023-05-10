@@ -80,7 +80,7 @@ class ProductAttributeKey(TimeStampAbstract, OperatorAbstract):
         db_table = 'product_attribute_key'
         unique_together = ('code', 'name')
         verbose_name = 'ProductAttributeKey'
-        ordering = ('priority', 'id')
+        ordering = ('priority', '-id')
 
     def __str__(self):
         return f'{self.name}: {self.category}'
@@ -101,7 +101,7 @@ class ProductAttributeValue(TimeStampAbstract, OperatorAbstract):
         db_table = 'product_attribute_value'
         unique_together = ('value_code', 'attr_value')
         verbose_name = 'ProductAttributeValue'
-        ordering = ('priority', 'id')
+        ordering = ('priority', '-id')
 
     def __str__(self):
         return f'{self.value_code} - {self.attr_value}'

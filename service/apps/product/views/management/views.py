@@ -7,10 +7,11 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import GenericViewSet
 
-from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, ProductAttributeValue
+from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
+    StockStatusChoices
 from apps.product.views.management.filters import BrandFilter
 from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer, \
-    AttributeKeySerializer, AttributeValueSerializer
+    AttributeGroupSerializer
 from drf.auth import ManageAuthenticate
 from drf.exceptions import ApiNotFoundError
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
@@ -116,16 +117,11 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
         )
 
 
-class AttributeKeyView(GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
+class AttributeGroupView(GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
     """
     商品属性Key
     """
     authentication_classes = [ManageAuthenticate, ]
     permission_classes = []
-    queryset = ProductAttributeKey.objects.all().order_by('priority')
-    serializer_class = AttributeKeySerializer
-
-
-class AttributeValueView(AttributeKeyView):
-    queryset = ProductAttributeValue.objects.all().order_by('priority')
-    serializer_class = AttributeValueSerializer
+    queryset = ProductAttributeKey.objects.filter(~Q(status=StockStatusChoices.DELETED.value)).order_by('priority')
+    serializer_class = AttributeGroupSerializer

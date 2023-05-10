@@ -43,15 +43,36 @@ class ProductBrandSerializer(serializers.ModelSerializer):
         }
 
 
-class AttributeKeySerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-
-    class Meta:
-        model = ProductAttributeKey
-        fields = '__all__'
-
-
 class AttributeValueSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['create_at'] = instance.create_at.strftime('%Y-%m-%d %H:%M:%S')
+        data['last_update'] = instance.last_update.strftime('%Y-%m-%d %H:%M:%S')
+        return data
+
     class Meta:
         model = ProductAttributeValue
         fields = '__all__'
+
+
+class AttributeGroupSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
+    attr_values = serializers.SerializerMethodField()
+
+    def get_attr_values(self, obj):
+        group_query = ProductAttributeValue.objects.filter(attribute_key=obj)
+        group_data = AttributeValueSerializer(group_query, many=True)
+        return group_data.data
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['create_at'] = instance.create_at.strftime('%Y-%m-%d %H:%M:%S')
+        data['last_update'] = instance.last_update.strftime('%Y-%m-%d %H:%M:%S')
+        return data
+
+    class Meta:
+        model = ProductAttributeKey
+        fields = ('id', 'code', 'name', 'priority', 'status', 'category', 'create_at', 'last_update', 'founder',
+                  'last_editor', 'attr_values')
+
