@@ -7,9 +7,10 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import GenericViewSet
 
-from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey
+from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, ProductAttributeValue
 from apps.product.views.management.filters import BrandFilter
-from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer, AttributeKeySerializer
+from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer, \
+    AttributeKeySerializer, AttributeValueSerializer
 from drf.auth import ManageAuthenticate
 from drf.exceptions import ApiNotFoundError
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
@@ -84,7 +85,6 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         update_data = request.data
-        print(update_data)
         instance = self._get_brand_instance(kwargs.get('pk'))
         if instance is None:
             raise ApiNotFoundError('品牌不存在')
@@ -93,7 +93,7 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
             update_data['status'] = ProductBrand.BrandStatus.DRAFT
             update_data['version'] = update_data.get('version') + 1
             update_data['json_object'] = self.get_serializer(instance).data
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(instance, data=update_data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
@@ -124,3 +124,8 @@ class AttributeKeyView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Creat
     permission_classes = []
     queryset = ProductAttributeKey.objects.all().order_by('priority')
     serializer_class = AttributeKeySerializer
+
+
+class AttributeValueView(AttributeKeyView):
+    queryset = ProductAttributeValue.objects.all().order_by('priority')
+    serializer_class = AttributeValueSerializer

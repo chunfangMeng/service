@@ -83,7 +83,7 @@ class ProductAttributeKey(TimeStampAbstract, OperatorAbstract):
         ordering = ('priority', 'id')
 
     def __str__(self):
-        return f'{self.name}: {self.info}'
+        return f'{self.name}: {self.category}'
 
 
 class ProductAttributeValue(TimeStampAbstract, OperatorAbstract):
