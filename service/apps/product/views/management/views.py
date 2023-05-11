@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
@@ -59,9 +58,7 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
 
     def get_object(self):
         queryset = self.filter_queryset(self.get_queryset())
-
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
         if isinstance(self.kwargs[lookup_url_kwarg], int):
             obj = get_object_or_404(queryset, **filter_kwargs)
@@ -69,7 +66,6 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
             obj = queryset.filter(brand_code=self.kwargs[lookup_url_kwarg]).first()
             if obj is None:
                 raise ApiNotFoundError('品牌不存在')
-
         self.check_object_permissions(self.request, obj)
         return obj
 

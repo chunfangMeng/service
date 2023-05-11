@@ -1,5 +1,6 @@
 from django.db import models
 
+from apps.webapp.models import CurrencyConfig
 from apps.webapp.models.abstract_models import TimeStampAbstract, OperatorAbstract
 
 
@@ -151,6 +152,8 @@ class ProductSpecs(TimeStampAbstract, OperatorAbstract):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="商品")
     status = models.IntegerField(default=0, choices=StockStatusChoices.choices, verbose_name="状态")
     priority = models.IntegerField(default=0, verbose_name="优先权")
+    price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='价格')
+    currency = models.ForeignKey(CurrencyConfig, on_delete=models.SET_NULL, null=True, verbose_name='货币')
 
     class Meta:
         db_table = 'product_specs'

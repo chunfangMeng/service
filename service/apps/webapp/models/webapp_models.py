@@ -50,3 +50,19 @@ class ChinaProvinceArea(models.Model):
 
     def __str__(self):
         return f'{self.area_code} / {self.name}'
+
+
+class CurrencyConfig(models.Model):
+    # 货币配置
+    country = models.ForeignKey(Country, on_delete=models.SET_NULL, null=True, verbose_name="国家")
+    abbreviation = models.CharField(max_length=6, verbose_name="简称")
+    mark = models.CharField(max_length=2, verbose_name='货币符号')
+    name = models.CharField(max_length=24, verbose_name='货币名称')
+    code = models.CharField(max_length=8, verbose_name='货币代码')
+
+    class Meta:
+        db_table = 'currency_config'
+
+    def __str__(self):
+        return f'{self.name}: {self.mark}'
+
