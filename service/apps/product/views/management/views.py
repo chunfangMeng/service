@@ -1,10 +1,12 @@
 from django.db.models import Q
+from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
+from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 
 from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
@@ -55,6 +57,22 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = BrandFilter
 
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        if isinstance(self.kwargs[lookup_url_kwarg], int):
+            obj = get_object_or_404(queryset, **filter_kwargs)
+        else:
+            obj = queryset.filter(brand_code=self.kwargs[lookup_url_kwarg]).first()
+            if obj is None:
+                raise ApiNotFoundError('品牌不存在')
+
+        self.check_object_permissions(self.request, obj)
+        return obj
+
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_queryset().filter(
             Q(brand_code=kwargs.get('pk')) | Q(id=kwargs.get('pk'))
@@ -66,19 +84,9 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
         serializer = self.get_serializer(instance)
         return JsonResponse(serializer.data)
 
-    def _get_brand_instance(self, code):
-        if isinstance(code, int):
-            instance = self.get_queryset().filter(
-                id=code
-            ).first()
-            return instance
-        return self.get_queryset().filter(brand_code=code).first()
-
     @method_decorator(csrf_exempt, name='dispatch')
     def destroy(self, request, *args, **kwargs):
-        instance = self._get_brand_instance(kwargs.get('pk'))
-        if instance is None:
-            raise ApiNotFoundError('品牌不存在或已被删除')
+        instance = self.get_object()
         instance.status = ProductBrand.BrandStatus.DELETED
         instance.save(update_fields=['status'])
         return JsonResponse(status=status.HTTP_204_NO_CONTENT)
@@ -86,9 +94,7 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         update_data = request.data
-        instance = self._get_brand_instance(kwargs.get('pk'))
-        if instance is None:
-            raise ApiNotFoundError('品牌不存在')
+        instance = self.get_object()
         update_data['id'] = instance.id
         if str(update_data.get('status')) != str(ProductBrand.BrandStatus.DRAFT):
             update_data['status'] = ProductBrand.BrandStatus.DRAFT
