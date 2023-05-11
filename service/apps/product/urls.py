@@ -7,7 +7,7 @@ urlpatterns = []
 
 router.register('management/category', product_manage_views.ProductCategoryView, basename='product_category_view')
 router.register('management/brand', product_manage_views.ProductBrandView, basename='product_brand_view')
-router.register('management/attribute/label', product_manage_views.AttributeGroupView,
+router.register('management/attribute', product_manage_views.AttributeGroupView,
                 basename='product_attribute_group')
 
 urlpatterns += router.urls

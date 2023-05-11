@@ -8,7 +8,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.viewsets import GenericViewSet
 
 from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
-    StockStatusChoices
+    StockStatusChoices, ProductAttributeValue
 from apps.product.views.management.filters import BrandFilter
 from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer, \
     AttributeGroupSerializer
@@ -125,3 +125,39 @@ class AttributeGroupView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Cre
     permission_classes = []
     queryset = ProductAttributeKey.objects.filter(~Q(status=StockStatusChoices.DELETED.value)).order_by('priority')
     serializer_class = AttributeGroupSerializer
+
+    def _get_attr_group_value(self, request, pk):
+        attr_value_code = request.data.get('attr_value_code')
+        attr_group_obj = self.get_queryset().filter(id=pk).first()
+        instance = ProductAttributeValue.objects.filter(
+            Q(attribute_key=attr_group_obj, value_code=attr_value_code) &
+            ~Q(status=StockStatusChoices.DELETED.value)
+        ).first()
+        return instance
+
+    @action(methods=['delete'], detail=True, url_path='delete/value')
+    def delete_attribute_value(self, request, *args, **kwargs):
+        """
+        删除属性分组下的属性
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        instance = self._get_attr_group_value(request, kwargs.get('pk'))
+        if instance is None:
+            raise ApiNotFoundError('属性值已被删除')
+        instance.status = StockStatusChoices.DELETED.value
+        instance.value_code = f'{instance.value_code}_DELETED'
+        instance.save(update_fields=['status', 'value_code'])
+        return JsonResponse(message='删除成功')
+
+    @action(methods=['patch'], detail=True, url_path='value/status')
+    def change_attr_value_status(self, request, *args, **kwargs):
+        value_status = request.data.get('status')
+        instance = self._get_attr_group_value(request, kwargs.get('pk'))
+        if instance.status == value_status:
+            return JsonResponse(message='状态不能相同')
+        instance.status = value_status
+        instance.save(update_fields=['status'])
+        return JsonResponse(message='切换状态成功')

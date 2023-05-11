@@ -1,6 +1,8 @@
+from django.db.models import Q
 from rest_framework import serializers
 
-from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, ProductAttributeValue
+from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
+    ProductAttributeValue, StockStatusChoices
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -44,6 +46,7 @@ class ProductBrandSerializer(serializers.ModelSerializer):
 
 
 class AttributeValueSerializer(serializers.ModelSerializer):
+    # 属性值
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -57,11 +60,14 @@ class AttributeValueSerializer(serializers.ModelSerializer):
 
 
 class AttributeGroupSerializer(serializers.ModelSerializer):
+    # 属性组
     category = CategorySerializer()
-    attr_values = serializers.SerializerMethodField()
+    attr_values = serializers.SerializerMethodField(read_only=True)
 
     def get_attr_values(self, obj):
-        group_query = ProductAttributeValue.objects.filter(attribute_key=obj)
+        group_query = ProductAttributeValue.objects.filter(
+            Q(attribute_key=obj) & ~Q(status=StockStatusChoices.DELETED.value)
+        )
         group_data = AttributeValueSerializer(group_query, many=True)
         return group_data.data
 
