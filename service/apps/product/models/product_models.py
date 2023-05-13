@@ -119,6 +119,7 @@ class Product(TimeStampAbstract, OperatorAbstract):
     net_weight = models.FloatField(default=0, verbose_name="净重[保留两位小数点]")
     place_of_origin = models.CharField(max_length=32, verbose_name="产地")
     item_no = models.CharField(max_length=48, db_index=True, verbose_name="货号")
+    priority = models.IntegerField(default=0, verbose_name="优先权")
     product_brand = models.ForeignKey(ProductBrand, on_delete=models.SET_NULL,
                                       null=True, blank=True, verbose_name="商品品牌")
 
@@ -126,10 +127,22 @@ class Product(TimeStampAbstract, OperatorAbstract):
         db_table = 'product'
         unique_together = ('spu_number', 'name', 'sub_name')
         verbose_name = 'Product'
-        ordering = ('-id', )
+        ordering = ('priority', '-id')
 
     def __str__(self):
         return f'{self.spu_number} - {self.name}'
+
+
+class ProductImage(models.Model):
+    """商品图片"""
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, verbose_name='商品')
+    img_path = models.CharField(max_length=128, verbose_name='图片地址')
+    priority = models.IntegerField(default=0, verbose_name="优先权")
+    is_main = models.BooleanField(default=False, verbose_name='是否是主图')
+
+    class Meta:
+        db_table = 'product_image'
+        ordering = ('priority', '-id')
 
 
 class ProductRelatedAttribute(TimeStampAbstract, OperatorAbstract):

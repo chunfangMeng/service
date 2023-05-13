@@ -2,7 +2,7 @@ from django.db.models import Q
 from rest_framework import serializers
 
 from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
-    ProductAttributeValue, StockStatusChoices
+    ProductAttributeValue, StockStatusChoices, Product
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -81,4 +81,10 @@ class AttributeGroupSerializer(serializers.ModelSerializer):
         model = ProductAttributeKey
         fields = ('id', 'code', 'name', 'priority', 'status', 'category', 'create_at', 'last_update', 'founder',
                   'last_editor', 'attr_values')
+
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
 

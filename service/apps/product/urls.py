@@ -9,5 +9,6 @@ router.register('management/category', product_manage_views.ProductCategoryView,
 router.register('management/brand', product_manage_views.ProductBrandView, basename='product_brand_view')
 router.register('management/attribute', product_manage_views.AttributeGroupView,
                 basename='product_attribute_group')
+router.register('management/product', product_manage_views.ProductView, basename='product_view')
 
 urlpatterns += router.urls

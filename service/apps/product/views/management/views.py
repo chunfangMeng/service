@@ -1,3 +1,5 @@
+import tempfile
+
 from django.db.models import Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -9,14 +11,15 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 
 from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
-    StockStatusChoices, ProductAttributeValue
+    StockStatusChoices, ProductAttributeValue, Product
 from apps.product.views.management.filters import BrandFilter
 from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer, \
-    AttributeGroupSerializer
+    AttributeGroupSerializer, ProductSerializer
 from drf.auth import ManageAuthenticate
 from drf.exceptions import ApiNotFoundError
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
 from drf.response import JsonResponse
+from libs.excel_hanlder import ExcelHandler
 
 
 class ProductCategoryView(GenericViewSet, ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin):
@@ -118,6 +121,20 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
             }
         )
 
+    @action(methods=['post'], detail=False)
+    def upload(self, request):
+        """
+        批量上传，创建或者更新
+        :param request:
+        :return:
+        """
+        file_byte = request.FILES.get('files')
+        with tempfile.NamedTemporaryFile(suffix=f'.{file_byte.name.split(".")[-1]}') as tmp:
+            tmp.write(file_byte.read())
+            excel_handler = ExcelHandler(tmp.name)
+            file_data = excel_handler.read_excel(min_row=1)
+        return JsonResponse()
+
 
 class AttributeGroupView(GenericViewSet, ListModelMixin, RetrieveModelMixin, CreateModelMixin):
     """
@@ -163,3 +180,11 @@ class AttributeGroupView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Cre
         instance.status = value_status
         instance.save(update_fields=['status'])
         return JsonResponse(message='切换状态成功')
+
+
+class ProductView(GenericViewSet, ListModelMixin, RetrieveModelMixin):
+    """商城"""
+    authentication_classes = [ManageAuthenticate, ]
+    permission_classes = []
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
