@@ -132,7 +132,37 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
         with tempfile.NamedTemporaryFile(suffix=f'.{file_byte.name.split(".")[-1]}') as tmp:
             tmp.write(file_byte.read())
             excel_handler = ExcelHandler(tmp.name)
-            file_data = excel_handler.read_excel(min_row=1)
+            file_data, _ = excel_handler.read_excel()
+        create_obj_list = []
+        update_obj_list = []
+        error_list = []
+        for item in file_data:
+            brand_code, brand_name, brand_en_name, brand_status = item
+            if brand_status not in ProductBrand.BrandStatus.values or \
+                    brand_status == ProductBrand.BrandStatus.DELETED.value:
+                error_list.append('品牌状态不存在')
+            brand_obj = self.get_queryset().filter(brand_code=str(item[0])).first()
+            if brand_obj is None:
+                product_brand = ProductBrand(
+                    brand_code=str(item[0]),
+                    name=str(item[1]),
+                    en_name=str(item[2]),
+                    status=int(item[3])
+                )
+                create_obj_list.append(product_brand)
+            else:
+                brand_obj.name = str(item[1])
+                brand_obj.en_name = str(item[2])
+                brand_obj.status = int(item[3])
+                update_obj_list.append(
+                    brand_obj
+                )
+        if len(error_list) > 0:
+            return JsonResponse(code=425, message='\n'.join(error_list))
+        if len(create_obj_list) > 0:
+            ProductBrand.objects.bulk_create(create_obj_list)
+        if len(update_obj_list) > 0:
+            ProductBrand.objects.bulk_update(update_obj_list, fields=['name', 'en_name', 'status'])
         return JsonResponse()
 
 

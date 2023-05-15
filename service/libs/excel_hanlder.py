@@ -24,7 +24,7 @@ class ExcelHandler(object):
         except ValueError:
             return False, 'sheet_name不存在'
 
-    def _xls_format_read(self, sheet_name=None, min_row=None):
+    def _xls_format_read(self, sheet_name=None, is_read_header=False):
         """
         xls文件读取
         :param sheet_name: 活动工作簿
@@ -37,15 +37,15 @@ class ExcelHandler(object):
         else:
             sheet = wb.sheet_by_index(0)
         rows = []
-        for i in range(0 if min_row is None else min_row, sheet.nrows):
+        for i in range(0 if is_read_header else 1, sheet.nrows):
             rows.append([col.value for col in sheet.row(i)])
         return rows, None
 
-    def _xlsx_format_read(self, sheet_name=None, min_row=None):
+    def _xlsx_format_read(self, sheet_name=None, is_read_header=False):
         """
         xlsx文件读取
         :param sheet_name: 活动工作簿
-        :param min_row: 从第几行开始
+        :param is_read_header:
         :return:
         """
         wb = load_workbook(filename=self.file_path)
@@ -56,7 +56,7 @@ class ExcelHandler(object):
             if not is_valid:
                 return [], msg
             sheet = wb[sheet_name]
-        if min_row is None:
+        if not is_read_header:
             min_row = 2
         rows = []
         for row in sheet.iter_rows(min_row=min_row):
@@ -69,17 +69,17 @@ class ExcelHandler(object):
             rows.append(row_data)
         return rows, None
 
-    def read_excel(self, sheet_name=None, min_row=None):
+    def read_excel(self, sheet_name=None, is_read_header=False):
         """
         读取excel
         :param sheet_name: 工作簿名，不传sheet_name时默认是读取活动工作簿
-        :param min_row: 从第几行开始读，openpyxl默认是从1开始读，1为表头
+        :param is_read_header:
         :return:
         """
         if os.path.splitext(self.file_path)[1] == '.xls':
-            rows, _ = self._xls_format_read(sheet_name, min_row)
+            rows, _ = self._xls_format_read(sheet_name, is_read_header)
         elif os.path.splitext(self.file_path)[1] == '.xlsx':
-            rows, _ = self._xlsx_format_read(sheet_name, min_row)
+            rows, _ = self._xlsx_format_read(sheet_name, is_read_header)
         return rows, None
 
     def write_excel(self, excel_data, is_overwrite=False):
