@@ -138,8 +138,16 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
         error_list = []
         for item in file_data:
             brand_code, brand_name, brand_en_name, brand_status = item
-            if brand_status not in ProductBrand.BrandStatus.values or \
-                    brand_status == ProductBrand.BrandStatus.DELETED.value:
+            if str(brand_code).strip() is None:
+                error_list.append('品牌代码不能为空')
+            if str(brand_name).strip() is None:
+                error_list.append('品牌名称不能为空')
+            if str(brand_en_name).strip() is None:
+                error_list.append('英文品牌名称不能为空')
+            if not str(brand_status).isdigit():
+                error_list.append('状态错误')
+            if int(brand_status) not in ProductBrand.BrandStatus.values or \
+                    int(brand_status) == ProductBrand.BrandStatus.DELETED.value:
                 error_list.append('品牌状态不存在')
             brand_obj = self.get_queryset().filter(brand_code=str(item[0])).first()
             if brand_obj is None:
