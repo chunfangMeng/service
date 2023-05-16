@@ -11,12 +11,12 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 
 from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
-    StockStatusChoices, ProductAttributeValue, Product
+    StockStatusChoices, ProductAttributeValue, Product, ProductImage, ProductRelatedAttribute
 from apps.product.views.management.filters import BrandFilter
 from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer, \
-    AttributeGroupSerializer, ProductSerializer
+    AttributeGroupSerializer, ProductSerializer, ProductImageSerializer
 from drf.auth import ManageAuthenticate
-from drf.exceptions import ApiNotFoundError
+from drf.exceptions import ApiNotFoundError, RequestParamsError
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
 from drf.response import JsonResponse
 from libs.excel_hanlder import ExcelHandler
@@ -219,8 +219,29 @@ class AttributeGroupView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Cre
 
 
 class ProductView(GenericViewSet, ListModelMixin, RetrieveModelMixin):
-    """商城"""
+    """商城商品"""
     authentication_classes = [ManageAuthenticate, ]
     permission_classes = []
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+
+    @action(methods=['get'], detail=True)
+    def image(self, request, *args, **kwargs):
+        instance = self.get_object()
+        image_list = ProductImage.objects.filter(product=instance)
+        product_image = ProductImageSerializer(image_list, many=True)
+        return JsonResponse(product_image.data)
+
+    @action(methods=['delete'], detail=True, url_path='unbind/attr')
+    def unbind_attr(self, request, *args, **kwargs):
+        attr_value_code = request.data.get('attr_value_code', [])
+        if not attr_value_code:
+            raise RequestParamsError('属性值代码不能为空')
+        instance = self.get_object()
+        if instance is None:
+            raise RequestParamsError('商品已被删除')
+        ProductRelatedAttribute.objects.filter(
+            product=instance,
+            product_attribute_value__value_code__in=attr_value_code
+        ).delete()
+        return JsonResponse(message='解绑成功')

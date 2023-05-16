@@ -1,8 +1,8 @@
-from django.db.models import Q
+from django.db.models import Q, Count
 from rest_framework import serializers
 
 from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
-    ProductAttributeValue, StockStatusChoices, Product
+    ProductAttributeValue, StockStatusChoices, Product, ProductRelatedAttribute, ProductImage
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -83,8 +83,45 @@ class AttributeGroupSerializer(serializers.ModelSerializer):
                   'last_editor', 'attr_values')
 
 
+class ProductAttrSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductRelatedAttribute
+        fields = ('product', 'product_attribute_value')
+        depth = 1
+
+
 class ProductSerializer(serializers.ModelSerializer):
+    attr_group = serializers.SerializerMethodField()
+
+    def get_attr_group(self, instance):
+        all_attr_key = ProductAttributeKey.objects.all()
+        all_attr_group = []
+        for attr_key in all_attr_key:
+            related_attribute = ProductRelatedAttribute.objects.filter(
+                product=instance,
+                product_attribute_value__attribute_key=attr_key
+            ).values('product_attribute_value__attribute_key_id').first()
+            attribute_obj = ProductAttributeKey.objects.filter(
+                id=related_attribute.get('product_attribute_value__attribute_key_id')
+            ).first()
+            all_attr_group.append(AttributeGroupSerializer(attribute_obj).data)
+        return all_attr_group
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['create_at'] = instance.create_at.strftime('%Y-%m-%d %H:%M:%S')
+        data['last_update'] = instance.last_update.strftime('%Y-%m-%d %H:%M:%S')
+        return data
+
     class Meta:
         model = Product
+        fields = ('id', 'spu_number', 'name', 'sub_name', 'gross_weight', 'net_weight', 'place_of_origin', 'item_no',
+                  'priority', 'product_brand', 'create_at', 'last_update', 'founder', 'last_editor', 'attr_group')
+        depth = 1
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
         fields = '__all__'
 

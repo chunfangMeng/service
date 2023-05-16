@@ -144,6 +144,9 @@ class ProductImage(models.Model):
         db_table = 'product_image'
         ordering = ('priority', '-id')
 
+    def __str__(self):
+        return f'Product: {self.product};src: {self.img_path}'
+
 
 class ProductRelatedAttribute(TimeStampAbstract, OperatorAbstract):
     """商品关联属性"""
@@ -155,7 +158,7 @@ class ProductRelatedAttribute(TimeStampAbstract, OperatorAbstract):
         verbose_name = 'ProductRelatedAttribute'
 
     def __str__(self):
-        return f'{self.product} / {self.product_attribute}'
+        return f'{self.product} / {self.product_attribute_value}'
 
 
 class ProductSpecs(TimeStampAbstract, OperatorAbstract):
