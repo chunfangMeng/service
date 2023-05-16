@@ -100,11 +100,21 @@ class ProductSerializer(serializers.ModelSerializer):
             related_attribute = ProductRelatedAttribute.objects.filter(
                 product=instance,
                 product_attribute_value__attribute_key=attr_key
-            ).values('product_attribute_value__attribute_key_id').first()
+            ).values('product_attribute_value__attribute_key_id', 'product_attribute_value_id')
+            if not related_attribute:
+                continue
+            attribute_values = ProductAttributeValue.objects.filter(
+                id__in=(item.get('product_attribute_value_id') for item in related_attribute),
+                attribute_key_id__in=(
+                    item.get('product_attribute_value__attribute_key_id') for item in related_attribute
+                )
+            )
             attribute_obj = ProductAttributeKey.objects.filter(
-                id=related_attribute.get('product_attribute_value__attribute_key_id')
+                id__in=(item.get('product_attribute_value__attribute_key_id') for item in related_attribute),
             ).first()
-            all_attr_group.append(AttributeGroupSerializer(attribute_obj).data)
+            attr_group = AttributeGroupSerializer(attribute_obj).data
+            attr_group['attr_values'] = AttributeValueSerializer(attribute_values, many=True).data
+            all_attr_group.append(attr_group)
         return all_attr_group
 
     def to_representation(self, instance):
