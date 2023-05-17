@@ -1,6 +1,7 @@
 .DS_Store
 compose/nginx/log/*
 compose/uwsgi/*
+compose/elasticsearch/*
 service/.idea
 service/venv
 webapp/.next

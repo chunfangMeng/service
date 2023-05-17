@@ -25,11 +25,6 @@ class ApiHttp {
     )
     this.instance.interceptors.response.use(
       (response) => {
-        if (typeof window === 'undefined') {
-          console.log('>>>', response.headers)
-        } else {
-          console.log('<<<', response.headers)
-        }
         if (Object.keys(response.data).includes('code')) {
           return response.data
         }

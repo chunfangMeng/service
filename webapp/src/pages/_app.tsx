@@ -57,7 +57,6 @@ function App({ Component, router, pageProps, props }: AppPropsWithLayout) {
 App.getInitialProps = async (context: AppContext) => {
   let isAuth = true;
   const { req, res } = context.ctx;
-  // console.log(req?.headers.cookie)
   const memberInfo = await authMember.getMemberInfo()
   if (memberInfo && [401, 403].includes(memberInfo.code)) {
     isAuth = notAuthRoutes.includes(context.router.pathname)

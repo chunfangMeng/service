@@ -11,8 +11,11 @@ networks:
     driver: bridge
   nginx_network:
     driver: bridge
+  elk_network:
+    driver: bridge
 services:
   redis:
+    container_name: redis_db
     restart: always
     image: redis:latest
     command: redis-server /etc/redis/redis.conf
@@ -24,6 +27,7 @@ services:
     ports:
       - "6379:6379"
   db:
+    container_name: mysql_db
     restart: always
     image: mysql
     env_file:
@@ -35,20 +39,66 @@ services:
       - ./compose/mysql/conf/my.conf:/etc/mysql/my.cnf  # 挂载配置文件
       - ./compose/mysql/init:/docker-entrypoint-initdb.d
     ports:
-      - "3306:3306"
+      - "3307:3306"
     expose:
       - "3306"
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
+    container_name: elasticsearch
+    environment:
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - discovery.type=single-node
+    networks:
+      - elk_network
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./compose/elasticsearch/elasticsearch-data:/usr/share/elasticsearch/data
+      - ./compose/elasticsearch/logs:/usr/share/elasticsearch/logs
+    restart: always
+    ports:
+      - 9200:9200
+    expose:
+      - "9200"
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.5.0
+    container_name: service_kibana
+    networks:
+      - elk_network
+    environment:
+      - elasticsearch.hosts=http://elk_network:9200
+      - ELASTICSEARCH_USERNAME=service_kibana_admin
+      - ELASTICSEARCH_PASSWORD=1234qwer
+      - I18N_LOCALE=zh-CN
+    depends_on:
+      - elasticsearch
+    restart: always
+    ports:
+      - 5601:5601
+    expose:
+      - "5601"
   app:
     restart: always
+    container_name: service_app
     build: ./service
     env_file: ./service/.env.prod
     networks:
       - nginx_network
       - redis_network
       - db_network
+      - elk_network
     depends_on:
       - redis
       - db
+      - elasticsearch
     volumes:
       - .:/service
       - static_vol:/var/www/html/service/static
@@ -60,6 +110,7 @@ services:
     stdin_open: true
 
   nginx:
+    container_name: service_nginx
     build: ./compose/nginx
     ports:
       - "80:80"
@@ -80,6 +131,7 @@ services:
     restart: always
   
   celery_worker:
+    container_name: service_celery_worker
     build:
       context: ./service
       dockerfile: ./Dockerfile
@@ -96,6 +148,7 @@ services:
     restart: unless-stopped
 
   celery_beat:
+    container_name: service_celery_beat
     build:
       context: ./service
       dockerfile: ./Dockerfile
@@ -114,6 +167,7 @@ services:
     restart: unless-stopped
 
   celery_flower:
+    container_name: service_celery_flower
     build:
       context: ./service
       dockerfile: ./Dockerfile

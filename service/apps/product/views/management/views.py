@@ -190,6 +190,19 @@ class AttributeGroupView(GenericViewSet, ListModelMixin, RetrieveModelMixin, Cre
         ).first()
         return instance
 
+    def list(self, request, *args, **kwargs):
+        is_show_all = request.GET.get('is_show_all')
+        queryset = self.filter_queryset(self.get_queryset())
+        if is_show_all:
+            return JsonResponse(self.get_serializer(queryset, many=True).data)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return JsonResponse(serializer.data)
+
     @action(methods=['delete'], detail=True, url_path='delete/value')
     def delete_attribute_value(self, request, *args, **kwargs):
         """

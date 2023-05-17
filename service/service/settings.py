@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_elasticsearch_dsl',
     'captcha',
     'corsheaders',
     'django_filters',
@@ -178,6 +179,11 @@ REST_TOKEN_VALID_DAY = os.environ.get('REST_TOKEN_VALID_DAY')
 # Captcha
 CAPTCHA_IMAGE_SIZE = (80, 45)
 
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': os.environ.get('ELASTICSEARCH_HOST', 'localhost:9200')
+    },
+}
 
 LOGGING = {
     'version': 1,
