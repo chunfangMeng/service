@@ -258,3 +258,25 @@ class ProductView(GenericViewSet, ListModelMixin, RetrieveModelMixin):
             product_attribute_value__value_code__in=attr_value_code
         ).delete()
         return JsonResponse(message='解绑成功')
+
+    @action(methods=['post'], detail=True, url_path='bind/attr')
+    def attr_bind(self, request, *args, **kwargs):
+        """属性绑定"""
+        attr_code = request.data.get('attr_code')
+        if not attr_code:
+            raise RequestParamsError('属性代码不能为空')
+        instance = self.get_object()
+        attr_value = ProductAttributeValue.objects.filter(value_code=attr_code).first()
+        if not attr_value:
+            raise RequestParamsError('属性不存在')
+        related_obj = ProductRelatedAttribute.objects.filter(
+            product=instance,
+            product_attribute_value=attr_value
+        ).exists()
+        if related_obj:
+            raise RequestParamsError('属性已绑定，请勿重复绑定')
+        ProductRelatedAttribute.objects.create(
+            product=instance,
+            product_attribute_value=attr_value
+        )
+        return JsonResponse(message='绑定成功')

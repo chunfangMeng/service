@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_elasticsearch_dsl',
+    'django_elasticsearch_dsl_drf',
     'captcha',
     'corsheaders',
     'django_filters',
@@ -181,7 +182,7 @@ CAPTCHA_IMAGE_SIZE = (80, 45)
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': os.environ.get('ELASTICSEARCH_HOST', 'localhost:9200')
+        'hosts': os.getenv('ELASTICSEARCH_HOST', 'localhost:9200')
     },
 }
 
