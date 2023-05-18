@@ -11,10 +11,10 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 
 from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
-    StockStatusChoices, ProductAttributeValue, Product, ProductImage, ProductRelatedAttribute
+    StockStatusChoices, ProductAttributeValue, Product, ProductImage, ProductRelatedAttribute, ProductSpecs
 from apps.product.views.management.filters import BrandFilter
 from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer, \
-    AttributeGroupSerializer, ProductSerializer, ProductImageSerializer
+    AttributeGroupSerializer, ProductSerializer, ProductImageSerializer, ProductSpecsSerializer
 from drf.auth import ManageAuthenticate
 from drf.exceptions import ApiNotFoundError, RequestParamsError
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
@@ -280,3 +280,11 @@ class ProductView(GenericViewSet, ListModelMixin, RetrieveModelMixin):
             product_attribute_value=attr_value
         )
         return JsonResponse(message='绑定成功')
+
+    @action(methods=['get'], detail=True)
+    def specs(self, request, *args, **kwargs):
+        instance = self.get_object()
+        specs_list = ProductSpecs.objects.filter(
+            product=instance
+        )
+        return JsonResponse(ProductSpecsSerializer(specs_list, many=True).data)

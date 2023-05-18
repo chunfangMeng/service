@@ -2,7 +2,7 @@ from django.db.models import Q, Count
 from rest_framework import serializers
 
 from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
-    ProductAttributeValue, StockStatusChoices, Product, ProductRelatedAttribute, ProductImage
+    ProductAttributeValue, StockStatusChoices, Product, ProductRelatedAttribute, ProductImage, ProductSpecs
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -134,4 +134,18 @@ class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
         fields = '__all__'
+
+
+class ProductSpecsSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['create_at'] = instance.create_at.strftime('%Y-%m-%d %H:%M:%S')
+        data['last_update'] = instance.last_update.strftime('%Y-%m-%d %H:%M:%S')
+        return data
+
+    class Meta:
+        model = ProductSpecs
+        fields = ('id', 'create_at', 'currency', 'founder', 'last_editor', 'last_update', 'price', 'sku', 'sku_name',
+                  'status')
+        depth = 1
 
