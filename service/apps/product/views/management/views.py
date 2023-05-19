@@ -1,5 +1,6 @@
 import tempfile
 
+from decimal import Decimal
 from django.db.models import Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -15,6 +16,8 @@ from apps.product.models.product_models import ProductCategory, ProductBrand, Pr
 from apps.product.views.management.filters import BrandFilter
 from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer, \
     AttributeGroupSerializer, ProductSerializer, ProductImageSerializer, ProductSpecsSerializer
+from apps.webapp.models import CurrencyConfig
+from apps.webapp.views.config.serializers import CurrencySerializer
 from drf.auth import ManageAuthenticate
 from drf.exceptions import ApiNotFoundError, RequestParamsError
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
@@ -288,3 +291,26 @@ class ProductView(GenericViewSet, ListModelMixin, RetrieveModelMixin):
             product=instance
         )
         return JsonResponse(ProductSpecsSerializer(specs_list, many=True).data)
+
+    @action(methods=['post'], detail=True, url_path='related/specs')
+    def related_specs(self, request, *args, **kwargs):
+        body_data = request.data
+        body_data['price'] = Decimal(body_data.get('price')).quantize(Decimal('0.00'))
+        instance = self.get_object()
+        currency_obj = CurrencyConfig.objects.filter(id=body_data.get('currency')).first()
+        if not currency_obj:
+            raise RequestParamsError('请先选择货币')
+        specs_check = ProductSpecs.objects.filter(
+            product=instance,
+            currency=currency_obj,
+            price=body_data.get('price')
+        ).exists()
+        if specs_check:
+            raise RequestParamsError('该商品已设置同样的价格')
+        body_data.update({
+            'product': instance,
+            'founder': request.user.username,
+            'currency': currency_obj
+        })
+        ProductSpecs.objects.create(**body_data)
+        return JsonResponse(message='绑定价格成功')

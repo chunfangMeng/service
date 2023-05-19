@@ -3,6 +3,8 @@ from rest_framework import serializers
 
 from apps.product.models.product_models import ProductCategory, ProductBrand, ProductAttributeKey, \
     ProductAttributeValue, StockStatusChoices, Product, ProductRelatedAttribute, ProductImage, ProductSpecs
+from apps.webapp.models import CurrencyConfig
+from apps.webapp.views.config.serializers import CurrencySerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -137,6 +139,10 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 
 class ProductSpecsSerializer(serializers.ModelSerializer):
+    sku = serializers.CharField(error_messages={'required': 'SKU不能为空'})
+    sku_name = serializers.CharField(error_messages={'required': 'SKU名称不能为空'})
+    price = serializers.CharField(error_messages={'required': '价格不能为空'})
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['create_at'] = instance.create_at.strftime('%Y-%m-%d %H:%M:%S')
