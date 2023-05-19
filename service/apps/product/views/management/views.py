@@ -1,6 +1,6 @@
 import tempfile
 
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.db.models import Q
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -314,3 +314,53 @@ class ProductView(GenericViewSet, ListModelMixin, RetrieveModelMixin):
         })
         ProductSpecs.objects.create(**body_data)
         return JsonResponse(message='绑定价格成功')
+
+    @action(methods=['delete'], detail=True, url_path='unbind/specs')
+    def unbind_specs(self, request, *args, **kwargs):
+        specs_id = request.data.get('specs_id')
+        if not specs_id:
+            raise RequestParamsError('请提交价格ID')
+        instance = self.get_object()
+        ProductSpecs.objects.filter(
+            product=instance,
+            id=specs_id
+        ).delete()
+        return JsonResponse(message='删除成功')
+
+    @action(methods=['put', 'patch'], detail=True, url_path='edit/specs')
+    def edit_specs(self, request, *args, **kwargs):
+        instance = self.get_object()
+        specs_id = request.data.get('id')
+        sku_name = request.data.get('sku_name', None)
+        price = request.data.get('price', None)
+        if not sku_name:
+            raise RequestParamsError('SKU名称不能为空')
+        if len(sku_name) > 32:
+            raise RequestParamsError('SKU名称长度不能超过32位')
+        if not specs_id:
+            raise RequestParamsError('请提交价格ID')
+        if not price:
+            raise RequestParamsError('价格不能为空')
+        try:
+            price = Decimal(str(price)).quantize(Decimal('0.00'))
+            assert price > 0
+        except InvalidOperation:
+            return JsonResponse(code=450, message="价格格式不正确")
+        except AssertionError:
+            return JsonResponse(code=451, message='价格必须大于0')
+        specs_instance = ProductSpecs.objects.filter(
+            id=specs_id,
+            product=instance,
+            price=price
+        ).exists()
+        if specs_instance:
+            raise RequestParamsError(f'{price}价格已存在')
+        ProductSpecs.objects.filter(
+            id=specs_id,
+            product=instance
+        ).update(
+            sku_name=sku_name,
+            price=price,
+            last_editor=request.user.username,
+        )
+        return JsonResponse()
