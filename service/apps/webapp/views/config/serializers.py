@@ -17,8 +17,11 @@ class CountrySerializer(serializers.ModelSerializer):
 
 class CurrencySerializer(serializers.ModelSerializer):
     country = CountrySerializer()
+    abbreviation = serializers.CharField(error_messages={'required': '请输入货币简称'})
+    mark = serializers.CharField(error_messages={'required': '请输入货币符号'})
+    name = serializers.CharField(error_messages={'required': '请输入货币名称'})
+    code = serializers.CharField(error_messages={'required': '请输入货币代码'})
 
     class Meta:
         model = CurrencyConfig
         fields = '__all__'
-        depth = 1
