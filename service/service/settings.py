@@ -102,7 +102,7 @@ DATABASES = {
         'USER': os.getenv('MYSQL_USER'),
         'PASSWORD': os.getenv('MYSQL_PASSWORD'),
         'HOST': os.getenv('MYSQL_HOST'),
-        'PORT': '3306',
+        'PORT': os.getenv('MYSQL_PORT'),
     }
 }
 
@@ -214,8 +214,23 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
+        'logstash': {
+            'level': 'INFO',
+            'class': 'logstash.TCPLogstashHandler',
+            'host': 'localhost',
+            'port': 4560,
+            'version': 1,
+            'message_type': 'django',
+            'fqdn': False,
+            'tags': ['django.request']
+        }
     },
     'loggers': {
+        '': {
+            'handlers': ['logstash'],
+            'level': 'INFO',
+            'prooagate': True
+        },
         'django': {
             'handlers': ['console'],
             'propagate': True,

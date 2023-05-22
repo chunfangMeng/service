@@ -42,42 +42,46 @@ services:
       - "3307:3306"
     expose:
       - "3306"
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.5.0
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
     container_name: elasticsearch
     environment:
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
       - discovery.type=single-node
     networks:
       - elk_network
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
     volumes:
       - ./compose/elasticsearch/elasticsearch-data:/usr/share/elasticsearch/data
-      - ./compose/elasticsearch/logs:/usr/share/elasticsearch/logs
+      - ./compose/elasticsearch/logs:/usr/share/elasticsearch/logs/
     restart: always
     ports:
-      - 9200:9200
+      - "9200:9200"
     expose:
       - "9200"
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.16.2
+    container_name: elk_logstash
+    volumes:
+      - ./compose/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    depends_on:
+      - es
+    networks:
+      - elk_network
+    ports:
+      - 4560:4560
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.5.0
+    image: docker.elastic.co/kibana/kibana:7.16.2
     container_name: service_kibana
     networks:
       - elk_network
     environment:
-      - elasticsearch.hosts=http://elk_network:9200
+      - elasticsearch.hosts=http://es:9200
       - ELASTICSEARCH_USERNAME=service_kibana_admin
       - ELASTICSEARCH_PASSWORD=1234qwer
       - I18N_LOCALE=zh-CN
     depends_on:
-      - elasticsearch
+      - es
     restart: always
     ports:
       - 5601:5601
@@ -96,7 +100,7 @@ services:
     depends_on:
       - redis
       - db
-      - elasticsearch
+      - es
     volumes:
       - .:/service
       - static_vol:/var/www/html/service/static

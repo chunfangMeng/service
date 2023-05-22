@@ -17,7 +17,6 @@ from apps.product.views.management.filters import BrandFilter
 from apps.product.views.management.serializers import CategorySerializer, ProductBrandSerializer, \
     AttributeGroupSerializer, ProductSerializer, ProductImageSerializer, ProductSpecsSerializer
 from apps.webapp.models import CurrencyConfig
-from apps.webapp.views.config.serializers import CurrencySerializer
 from drf.auth import ManageAuthenticate
 from drf.exceptions import ApiNotFoundError, RequestParamsError
 from drf.mixins import ListModelMixin, CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
