@@ -14,21 +14,9 @@ RUN /usr/local/bin/python -m pip install --upgrade pip
 
 RUN pip install -r requirements.txt
 
-RUN sed -i 's/\r//' ./start.sh
+RUN sed -i 's/\r//' ./start.sh ./start_celery.sh ./start_flower.sh ./start_celery_beat.sh
 
-RUN chmod +x ./start.sh
-
-RUN sed -i 's/\r//' ./start_celery.sh
-
-RUN chmod +x ./start_celery.sh
-
-RUN sed -i 's/\r//' ./start_flower.sh
-
-RUN chmod +x ./start_flower.sh
-
-RUN sed -i 's/\r//' ./start_celery_beat.sh
-
-RUN chmod +x ./start_celery_beat.sh
+RUN chmod +x ./start.sh ./start_celery.sh ./start_flower.sh ./start_celery_beat.sh
 
 ENTRYPOINT /bin/bash ./start.sh
 

@@ -138,11 +138,11 @@ class ProductBrandView(GenericViewSet, ListModelMixin, CreateModelMixin, UpdateM
         error_list = []
         for item in file_data:
             brand_code, brand_name, brand_en_name, brand_status = item
-            if str(brand_code).strip() is None:
+            if not str(brand_code).strip():
                 error_list.append('品牌代码不能为空')
-            if str(brand_name).strip() is None:
+            if not str(brand_name).strip():
                 error_list.append('品牌名称不能为空')
-            if str(brand_en_name).strip() is None:
+            if not str(brand_en_name).strip():
                 error_list.append('英文品牌名称不能为空')
             if not str(brand_status).isdigit():
                 error_list.append('状态错误')

@@ -182,7 +182,7 @@ CAPTCHA_IMAGE_SIZE = (80, 45)
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': os.getenv('ELASTICSEARCH_HOST', 'localhost:9200')
+        'hosts': f"elasticsearch:9200"
     },
 }
 
@@ -222,7 +222,7 @@ LOGGING = {
             'version': 1,
             'message_type': 'django',
             'fqdn': False,
-            'tags': ['django.request']
+            'tags': ['django.request'],
         }
     },
     'loggers': {
