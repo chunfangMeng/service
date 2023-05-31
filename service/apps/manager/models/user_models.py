@@ -3,6 +3,7 @@ from django.db import models
 
 from apps.member.models import UserGenderChoices
 from apps.webapp.models.abstract_models import TimeStampAbstract, OperatorAbstract
+from service.settings import CUSTOM_PERMISSIONS
 
 
 class ManagerUser(TimeStampAbstract):
@@ -17,6 +18,7 @@ class ManagerUser(TimeStampAbstract):
 
     class Meta:
         db_table = 'manager_user'
+        permissions = CUSTOM_PERMISSIONS
 
     def __str__(self):
         return f'User: {self.user} | Nickname:{self.nickname}'
