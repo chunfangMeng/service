@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = "导入中国省市区信息"
 
     def handle(self, *args, **options):
-        with open('ChinaArea.json', 'r') as f:
+        with open('./assets/ChinaArea.json', 'r') as f:
             source_data = json.loads(f.read())
 
         for province_item in source_data:

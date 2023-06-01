@@ -4,6 +4,8 @@ compose/uwsgi/*
 compose/elasticsearch/*
 service/.idea
 service/venv
+service/.env
+service/.env.prod
 webapp/.next
 webapp/node_modules
 .env
