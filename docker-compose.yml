@@ -11,8 +11,9 @@ networks:
     driver: bridge
   nginx_network:
     driver: bridge
-  elk_network:
-    driver: bridge
+  elk_net:
+    name: 'elk_elk_network'
+    external: true
 services:
   redis:
     container_name: redis_db
@@ -42,51 +43,6 @@ services:
       - "3307:3306"
     expose:
       - "3306"
-  es:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.2
-    container_name: elasticsearch
-    environment:
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
-      - discovery.type=single-node
-    networks:
-      - elk_network
-    volumes:
-      - ./compose/elasticsearch/elasticsearch-data:/usr/share/elasticsearch/data
-      - ./compose/elasticsearch/logs:/usr/share/elasticsearch/logs/
-    restart: always
-    ports:
-      - "9200:9200"
-    expose:
-      - "9200"
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.16.2
-    container_name: elk_logstash
-    volumes:
-      - ./compose/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    depends_on:
-      - es
-    networks:
-      - elk_network
-    ports:
-      - 4560:4560
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.16.2
-    container_name: service_kibana
-    networks:
-      - elk_network
-    environment:
-      - elasticsearch.hosts=http://es:9200
-      - ELASTICSEARCH_USERNAME=service_kibana_admin
-      - ELASTICSEARCH_PASSWORD=1234qwer
-      - I18N_LOCALE=zh-CN
-    depends_on:
-      - es
-    restart: always
-    ports:
-      - 5601:5601
-    expose:
-      - "5601"
   app:
     restart: always
     container_name: service_app
@@ -96,18 +52,15 @@ services:
       - nginx_network
       - redis_network
       - db_network
-      - elk_network
+      - elk_net
     depends_on:
       - redis
       - db
-      - es
     volumes:
       - .:/service
       - static_vol:/var/www/html/service/static
       - media_vol:/var/www/html/service/media
       - ./compose/uwsgi:/tmp
-    expose:
-      - "8000"
     tty: true
     stdin_open: true
 

@@ -3,7 +3,7 @@ from django.db import models
 
 from apps.member.models import UserGenderChoices
 from apps.webapp.models.abstract_models import TimeStampAbstract, OperatorAbstract
-from service.settings import CUSTOM_PERMISSIONS
+from drf.permission import CUSTOM_PERMISSIONS
 
 
 class ManagerUser(TimeStampAbstract):

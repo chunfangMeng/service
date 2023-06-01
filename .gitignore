@@ -6,3 +6,4 @@ service/.idea
 service/venv
 webapp/.next
 webapp/node_modules
+.env
