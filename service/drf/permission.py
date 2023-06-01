@@ -45,12 +45,13 @@ CUSTOM_PERMISSIONS = (
 
 class ManagerPermission(BasePermission):
     def has_permission(self, request, view):
-        print(view.permission_list)
-        print('<<<'*3, dir(request.user))
-        print('>>>>', dir(request.user.user_permissions))
-        if request.user.is_authenticated:
+        if request.user.is_superuser:
             return True
-
+        if not request.user.is_authenticated:
+            return False
+        all_permission = list(request.user.get_user_permissions())
+        if len(list(set(all_permission).intersection(set(view.permission_list)))) == 0:
+            return False
         return False
 
     def has_object_permission(self, request, view, obj):

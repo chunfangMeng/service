@@ -8,6 +8,7 @@ from drf.permission import CUSTOM_PERMISSIONS
 
 class ManagerUser(TimeStampAbstract):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, verbose_name="会员")
+    job_number = models.CharField(max_length=24, verbose_name="工号")
     nickname = models.CharField(max_length=64, unique=True, db_index=True, verbose_name="用户昵称")
     phone = models.CharField(max_length=24, null=True, blank=True, verbose_name="联系电话")
     gender = models.IntegerField(

@@ -182,7 +182,7 @@ CAPTCHA_IMAGE_SIZE = (80, 45)
 
 ELASTICSEARCH_DSL = {
     'default': {
-        'hosts': f"elasticsearch:9200"
+        'hosts': f"{os.getenv('ELASTICSEARCH_HOST', 'localhost')}:9200"
     },
 }
 
