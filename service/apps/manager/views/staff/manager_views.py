@@ -24,11 +24,16 @@ class ManagerStaffView(GenericViewSet, ListModelMixin, RetrieveModelMixin):
 
     @action(methods=['get'], detail=True, permission_list=['staff_change'], url_path='user/permission')
     def get_user_permission(self, request, pk):
+        """
+        获取用户权限
+        :param request:
+        :param pk:
+        :return:
+        """
         all_permission = []
         try:
             user_id = int(pk)
-            print(user_id)
-        except:
+        except ValueError:
             return JsonResponse(code=4043, message='用户ID错误')
         has_permission = []
         manager_user = ManagerUser.objects.filter(
@@ -54,3 +59,29 @@ class ManagerStaffView(GenericViewSet, ListModelMixin, RetrieveModelMixin):
             'all_permission': all_permission,
             'has_permission': has_permission
         })
+
+    @action(methods=['put'], detail=True, permission_list=['staff_change'], url_path='permission/modify')
+    def modify_permission(self, request, pk):
+        """
+        修改用户权限
+        :param request:
+        :param pk:
+        :return:
+        """
+        permissions = request.data.get('permissions', '')
+        try:
+            user_id = int(pk)
+        except ValueError:
+            return JsonResponse(code=4043, message='用户ID错误')
+        manager_user = ManagerUser.objects.filter(
+            id=user_id
+        ).first()
+        manager_user.user.user_permissions.clear()
+        for permission_key in permissions:
+            if permissions.get(permission_key):
+                print(permission_key)
+                permission_obj = Permission.objects.filter(codename=permission_key.strip()).first()
+                if permission_obj:
+                    manager_user.user.user_permissions.add(permission_obj)
+        manager_user.user.save()
+        return JsonResponse(message="权限修改成功")
