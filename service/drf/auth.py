@@ -27,7 +27,7 @@ class UserBaseAuthenticate(authentication.SessionAuthentication):
             if not hasattr(user, 'auth_token') or user.auth_token is None:
                 raise exceptions.AuthenticationFailed('请重新登陆')
             self.verify_token(user.auth_token)
-            self.enforce_csrf(request)
+            # self.enforce_csrf(request)
             return user, None
         token_key = request.META.get('HTTP_AUTHORIZATION')
         if not token_key:
