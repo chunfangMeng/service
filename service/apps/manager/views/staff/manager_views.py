@@ -126,3 +126,19 @@ class ManagerStaffView(GenericViewSet, ListModelMixin, RetrieveModelMixin):
         manager_user.user.save()
         manager_user.save()
         return JsonResponse(message="修改成功")
+
+    @action(methods=['post'], detail=True, url_path='modify/pwd')
+    def modify_staff_pwd(self, request, pk):
+        password = request.data.get('password')
+        try:
+            user_id = int(pk)
+        except ValueError:
+            return JsonResponse(code=4043, message='用户ID错误')
+        manager_user = ManagerUser.objects.filter(
+            id=user_id
+        ).first()
+        if not manager_user:
+            return JsonResponse(code=4004, message='员工不存在')
+        manager_user.user.set_password(password)
+        manager_user.user.save()
+        return JsonResponse(message='修改成功')
