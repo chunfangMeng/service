@@ -130,6 +130,8 @@ class ManagerStaffView(GenericViewSet, ListModelMixin, RetrieveModelMixin):
     @action(methods=['post'], detail=True, url_path='modify/pwd')
     def modify_staff_pwd(self, request, pk):
         password = request.data.get('password')
+        if not password:
+            return JsonResponse(code=4025, message="密码不能为空")
         try:
             user_id = int(pk)
         except ValueError:
