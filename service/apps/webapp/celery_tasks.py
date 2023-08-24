@@ -15,7 +15,7 @@ def user_bind_ip_area(ip_address: str, login_log_id: int) -> None:
     """
     sync_requests = Requests()
     address_url = f'http://opendata.baidu.com/api.php?query={ip_address}&co=&resource_id=6006&oe=utf8'
-    ip_area = sync_requests.get(address_url)
+    ip_area = sync_requests.common_request(address_url)
     instance = UserLoginLog.objects.filter(id=login_log_id)
     try:
         ip_area = json.loads(ip_area)
